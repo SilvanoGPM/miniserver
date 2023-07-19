@@ -1,6 +1,7 @@
 use std::{
+    fs,
     io::{prelude::*, BufReader},
-    net::{TcpListener, TcpStream}
+    net::{TcpListener, TcpStream},
 };
 
 fn main() {
@@ -16,11 +17,20 @@ fn main() {
 fn handle_connection(mut stream: TcpStream) {
     let buf_reader = BufReader::new(&mut stream);
 
-    let http_request: Vec<_> = buf_reader
+    let _http_request: Vec<_> = buf_reader
         .lines()
         .map(|result| result.unwrap())
         .take_while(|line| !line.is_empty())
         .collect();
 
-    println!("Request: {http_request:#?}");
+    let status_line = "HTTP/1.1 200 OK";
+    let content = fs::read_to_string("example.json").unwrap();
+    let content_length = content.len();
+    
+    let headers = format!("Content-Length: {content_length}, Content-Type: application/json")
+        .replace(", ", "\r\n");
+
+    let response = format!("{status_line}\r\n{headers}\r\n\r\n{content}");
+
+    stream.write_all(response.as_bytes()).unwrap();
 }
