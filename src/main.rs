@@ -1,16 +1,23 @@
 use std::{
+    thread,
+    time,
     fs,
     io::{prelude::*, BufReader},
     net::{TcpListener, TcpStream},
 };
 
+use miniserver::ThreadPool;
+
 fn main() {
     let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+    let pool = ThreadPool::new(4);
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();
 
-        handle_connection(stream);
+        pool.execute(|| {
+            handle_connection(stream);
+        });
     }
 }
 
@@ -19,12 +26,13 @@ fn handle_connection(mut stream: TcpStream) {
 
     let request_line = buf_reader.lines().next().unwrap().unwrap();
 
-    let is_index_page = request_line == "GET / HTTP/1.1";
-
-    let (status, content_type, filename) = if is_index_page {
-        ("200 OK", "application/json", "example.json")
-    } else {
-        ("404 NOT FOUND", "text/html", "404.html")
+    let (status, content_type, filename) = match &request_line[..] {
+        "GET / HTTP/1.1" => ("200 OK", "application/json", "example.json"),
+        "GET /sleep HTTP/1.1" => {
+            thread::sleep(time::Duration::from_secs(5));
+            ("200 OK", "application/json", "example.json")
+        },
+        _ => ("404 NOT FOUND", "text/html", "404.html"),
     };
 
     let status_line = format!("HTTP/1.1 {status}");
