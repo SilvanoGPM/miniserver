@@ -15,9 +15,11 @@ Para executar o projeto utilize o comando:
 cargo run
 ```
 
-Agora em um navegador, acesse o endereço `localhost:7878`.
-Se tudo der certo, você vai ver um arquivo JSON como resposta.
-Caso queria emular uma rota que demora para responder, você pode acessar `localhost:7878/sleep`, isso fará o servidor esperar 5 segundos antes de responder.
+Agora em um navegador, acesse o endereço `localhost:7878` e você deve receber um JSON como resposta de sucesso.
+<br />
+Caso queria simular uma atraso no lado do servidor, acesse o endereço `localhost:7878/sleep`, você deve receber o mesmo JSON porém com um atraso de 5 segundos.
+<br />
+Qualquer outro endereço deve retornar um HTML.
 
 ## :heart: Agradecimentos
 
